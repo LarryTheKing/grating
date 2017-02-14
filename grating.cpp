@@ -1,6 +1,9 @@
 /* Larry King 2017 
 	Generates a circular polarization grating
 	and exports as a vector graphics file (svg)
+
+	Compile using gcc grating.cpp -lm -o grating
+	Run using ./grating
 */
 
 #include <stdint.h>
