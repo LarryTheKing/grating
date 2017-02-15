@@ -55,7 +55,7 @@ void printLine(FILE * const pFile, const Line line, const DATA_TX width = LWIDTH
 
 int main()
 {
-	DATA_TX const twoRadius = 2 * RADIUS;
+	DATA_TX const diameter = 2 * RADIUS;
 	DATA_TX const step = STEP;
 	DATA_TX const width = LWIDTH;
 
@@ -67,7 +67,7 @@ int main()
 
 	printHeader(pFile, RADIUS);
 
-	for (DATA_TX x = 1; x < twoRadius; x += step)
+	for (DATA_TX x = step; x < diameter; x += step)
 	{
 		printLine(pFile, calcLine(x));
 	}
@@ -90,7 +90,7 @@ Line calcLine(const DATA_TX x, const DATA_TX radius)
 }
 
 #define SVG_HEADER_1 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
-#define SVG_HEADER_2 "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%fmm\" height=\"%fmm\">\n"
+#define SVG_HEADER_2 "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%.3fmm\" height=\"%.3fmm\">\n"
 void printHeader(FILE * const pFile,const DATA_TX radius)
 {
 	const double size = 2.0 * radius * MM_UM;
@@ -104,7 +104,7 @@ void printFooter(FILE * const pFile)
 	fprintf(pFile, "</svg>\n");
 }
 
-#define SVG_LINE_STRING "\t<line x1=\"%fmm\" y1=\"%fmm\" x2=\"%fmm\" y2=\"%fmm\" stroke=\"black\" stroke-width=\"%fmm\"/>\n"
+#define SVG_LINE_STRING "\t<line x1=\"%.3fmm\" y1=\"%fmm\" x2=\"%.3fmm\" y2=\"%fmm\" stroke=\"black\" stroke-width=\"%fmm\"/>\n"
 void printLine(FILE * const pFile, const Line line, const DATA_TX width)
 {
 	double const x1 = line.p1.x * MM_UM;
