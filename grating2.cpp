@@ -1,22 +1,22 @@
 /* Larry King 2017 
 	Generates a circular polarization grating
 	and exports as a vector graphics file (svg)
-	(Uses svg lines)
+	(Uses svg rectangles)
 
-	Compile using gcc grating.cpp -lm -o grating
-	Run using ./grating
+	Compile using gcc grating2.cpp -lm -o grating2
+	Run using ./grating2
 */
 
 #include <stdint.h>
 #include <math.h>
 #include <stdio.h>
 
-#define FILENAME "out.svg"
+#define FILENAME "out2.svg"
 
 /* All units in micrometers unless otherwise noted */
 #define RADIUS	22000
 #define STEP	7
-#define LWIDTH	5
+#define RWIDTH	5
 
 /* Conversion factor millimeters/micrometer */
 #define MM_UM	0.001
@@ -24,41 +24,32 @@
 typedef int_fast64_t	DATA_TX;
 typedef double			DATA_TY;
 
-struct Point
+struct Rectangle
 {
 
 public:
 	DATA_TX x;
+	DATA_TX width;
 	DATA_TY y;
+	DATA_TY height;
 
-	Point(const DATA_TX x, const DATA_TY y)
-		: x(x), y(y) {}
+	Rectangle(const DATA_TX x, const DATA_TY y, const DATA_TX width, const DATA_TY height)
+		: x(x), y(y), width(width), height(height) {}
 };
 
-struct Line
-{
-
-public:
-	Point p1;
-	Point p2;
-
-	Line(const Point p1, const Point p2)
-		: p1(p1), p2(p2) {}
-};
-
-Line calcLine(const DATA_TX x, const DATA_TX radius = RADIUS);
+Rectangle calcRectangle(const DATA_TX x, const DATA_TX width = RWIDTH, const DATA_TX radius = RADIUS);
 
 void printHeader(FILE * const pFile, const DATA_TX radius = RADIUS);
 
 void printFooter(FILE * const pFile);
 
-void printLine(FILE * const pFile, const Line line, const DATA_TX width = LWIDTH);
+void printRectangle(FILE * const pFile, const Rectangle rectangle);
 
 int main()
 {
 	DATA_TX const diameter = 2 * RADIUS;
 	DATA_TX const step = STEP;
-	DATA_TX const width = LWIDTH;
+	DATA_TX const width = RWIDTH;
 
 	FILE * pFile = fopen(FILENAME, "w");
 	if (!pFile) {
@@ -70,7 +61,7 @@ int main()
 
 	for (DATA_TX x = step; x < diameter; x += step)
 	{
-		printLine(pFile, calcLine(x));
+		printRectangle(pFile, calcRectangle(x));
 	}
 
 	printFooter(pFile);
@@ -80,14 +71,15 @@ int main()
 	return 0;
 }
 
-Line calcLine(const DATA_TX x, const DATA_TX radius)
+Rectangle calcRectangle(const DATA_TX x, const DATA_TX width, const DATA_TX radius)
 {
 	const DATA_TX   xCoord  = (x < radius ? radius - x: x - radius);
-	double const	yOffset = sqrt(radius * radius - xCoord * xCoord);
+	const DATA_TY	halfHeight = sqrt(radius * radius - xCoord * xCoord);
 	
-	return Line(
-		Point(x, (DATA_TY)(radius - yOffset)),
-		Point(x, (DATA_TY)(radius + yOffset)));
+	return Rectangle(
+		x, (DATA_TY)(radius - halfHeight),
+		width, 2 * halfHeight);
+
 }
 
 #define SVG_HEADER_1 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
@@ -105,14 +97,13 @@ void printFooter(FILE * const pFile)
 	fprintf(pFile, "</svg>\n");
 }
 
-#define SVG_LINE_STRING "\t<line x1=\"%.3fmm\" y1=\"%fmm\" x2=\"%.3fmm\" y2=\"%fmm\" stroke=\"black\" stroke-width=\"%fmm\"/>\n"
-void printLine(FILE * const pFile, const Line line, const DATA_TX width)
+#define SVG_RECTANGLE_STRING "\t<rect x=\"%.3fmm\" y=\"%fmm\" width=\"%.3fmm\" height=\"%fmm\" fill=\"black\"/>\n"
+void printRectangle(FILE * const pFile, const Rectangle rectangle)
 {
-	double const x1 = line.p1.x * MM_UM;
-	double const y1 = line.p1.y * MM_UM;
-	double const x2 = line.p2.x * MM_UM;
-	double const y2 = line.p2.y * MM_UM;
-	double const w = width * MM_UM;
+	double const x = rectangle.x 	  * MM_UM;
+	double const y = rectangle.y 	  * MM_UM;
+	double const w = rectangle.width  * MM_UM;
+	double const h = rectangle.height * MM_UM;
 
-	fprintf(pFile, SVG_LINE_STRING, x1, y1, x2, y2, w);
+	fprintf(pFile, SVG_RECTANGLE_STRING, x, y, w, h);
 }
